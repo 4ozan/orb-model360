@@ -1,27 +1,67 @@
-import * as THREE from 'three'; // importing as tree object
+import * as THREE from "three";
+import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls'; // <-- ADD THIS LINE
 
-//declaring the scene and the camera view point
+const w = window.innerWidth;
+const h = window.innerHeight;
+
+const renderer = new THREE.WebGLRenderer({ antialias: true });
+renderer.setSize(w, h);
+document.body.appendChild(renderer.domElement);
+
+const fov = 75;
+const aspectRatio = w / h;
+const near = 0.1;
+const far = 10;
+
+const camera = new THREE.PerspectiveCamera(fov, aspectRatio, near, far);
+camera.position.z = 2;
 const scene = new THREE.Scene();
-const camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 0.1, 1000 );
 
-//using the rendere to render the animation
-const renderer = new THREE.WebGLRenderer();
-renderer.setSize( window.innerWidth, window.innerHeight );// setting size to window lenght per each browser
-renderer.setAnimationLoop( animate ); // animate after the page closes and refreshes
-document.body.appendChild( renderer.domElement );
+const controls = new OrbitControls(camera, renderer.domElement);
 
-const geometry = new THREE.BoxGeometry( 1, 1, 1 ); // creating the geometry object of box
-const material = new THREE.MeshBasicMaterial( { color: 0x00ff00 } ); // adding a mesh matrial with color 
-const cube = new THREE.Mesh( geometry, material ); //then joing them to create a cube 
-scene.add( cube );  // we add the cube to the scene
+controls.enableDamping = true;
 
-camera.position.z = 5;  
+controls.dampingFactor = 0.03; 
 
-function animate() {
+const geo = new THREE.IcosahedronGeometry(1.0, 2);
+const mat = new THREE.MeshStandardMaterial({
+    color: 0xffffff,
+    flatShading: true
+});
+const wireMat = new THREE.MeshBasicMaterial({
+    color: 0xffffff,
+    wireframe: true
+});
 
-  cube.rotation.x += 0.01;
-  cube.rotation.y += 0.01;
+const wireMesh = new THREE.Mesh(geo, wireMat);
+wireMesh.scale.setScalar(1.001);
+scene.add(wireMesh);
 
-  renderer.render( scene, camera );
+const mesh = new THREE.Mesh(geo, mat); 
+scene.add(mesh);
 
+const hemiLight = new THREE.HemisphereLight(0x0099ff, 0xaa5500);
+scene.add(hemiLight);
+
+
+function animate() { 
+    requestAnimationFrame(animate);
+
+    mesh.rotation.y += 0.005; 
+    wireMesh.rotation.y += 0.005; 
+
+    controls.update(); 
+    renderer.render(scene, camera);
 }
+
+animate();
+
+window.addEventListener('resize', () => {
+    const newWidth = window.innerWidth;
+    const newHeight = window.innerHeight;
+
+    camera.aspect = newWidth / newHeight;
+    camera.updateProjectionMatrix();
+
+    renderer.setSize(newWidth, newHeight);
+});
