@@ -1,27 +1,17 @@
 import * as THREE from "three";
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls'; // <-- ADD THIS LINE
 
-const w = window.innerWidth;
-const h = window.innerHeight;
-
 const renderer = new THREE.WebGLRenderer({ antialias: true });
-renderer.setSize(w, h);
+renderer.setSize(window.innerWidth,window.innerHeight);
 document.body.appendChild(renderer.domElement);
 
-const fov = 75;
-const aspectRatio = w / h;
-const near = 0.1;
-const far = 10;
-
-const camera = new THREE.PerspectiveCamera(fov, aspectRatio, near, far);
+const camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 10);
 camera.position.z = 2;
 const scene = new THREE.Scene();
 
 const controls = new OrbitControls(camera, renderer.domElement);
-
 controls.enableDamping = true;
-
-controls.dampingFactor = 0.03; 
+controls.dampingFactor = 0.003; 
 
 const geo = new THREE.IcosahedronGeometry(1.0, 2);
 const mat = new THREE.MeshStandardMaterial({
@@ -43,17 +33,14 @@ scene.add(mesh);
 const hemiLight = new THREE.HemisphereLight(0x0099ff, 0xaa5500);
 scene.add(hemiLight);
 
-
 function animate() { 
     requestAnimationFrame(animate);
-
     mesh.rotation.y += 0.005; 
     wireMesh.rotation.y += 0.005; 
 
     controls.update(); 
     renderer.render(scene, camera);
 }
-
 animate();
 
 window.addEventListener('resize', () => {
